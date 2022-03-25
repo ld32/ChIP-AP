@@ -39,11 +39,14 @@ conda_file = shutil.which('conda') # Get the full path to anaconda 3
 conda_dir = '{}/anaconda3'.format(conda_file.split('/anaconda3/')[0]) # Get the parent directory of anaconda 3
 
 while True: # Infinite loop until broken by user action
-    user_answer = input('Do you want to install ChIP-AP in a specific environment? (Y/N) ') # Proceed only after the user provided Y or N answer to this question
+    user_answer = 'y' #input('Do you want to install ChIP-AP in a specific environment? (Y/N) ') # Proceed only after the user provided Y or N answer to this question
 
     if user_answer.lower() == 'y': # If user is installing ChIP-AP in a newly created environment
         user_environment = input('Please type in the name of your ChIP-AP environment: ') # Ask what the user wants the newly created conda environment to be named with
-        chipap_env_dir = '{}/envs/{}'.format(conda_dir, user_environment)
+        conda_dir = input('Please type in the path to your ChIP-AP environment: ')
+        os.makedirs(conda_dir, exist_ok=True)
+
+        chipap_env_dir = '{}/{}'.format(conda_dir, user_environment)
         prefix_string = 'prefix: {}'.format(chipap_env_dir) # Path to the directory in which the newly created environment components are installed
         name_string = 'name: {}'.format(user_environment) # The name of the newly created environment
         input('ChIP-AP will be installed in {} environment. Press ENTER to continue'.format(user_environment)) # Notify the user
@@ -89,7 +92,7 @@ elif sys.platform == "darwin": # Execute this instead if the installation platfo
 
 
 if user_answer.lower() == 'y': # Execute this if user is installing ChIP-AP in a newly created environment
-    subprocess.run('conda env create -f {}/chipap_{}.yml'.format(sys.path[0], user_environment), shell = True)
+    subprocess.run('mamba env create -f {}/chipap_{}.yml  -p {}'.format(sys.path[0], user_environment, chipap_env_dir), shell = True)
 
 if user_answer.lower() == 'n': # Execute this if user is installing ChIP-AP in the base environment (where Anaconda 3 is installed)
     subprocess.run('conda env update -f {}/chipap_{}.yml'.format(sys.path[0], user_environment), shell = True)
@@ -134,7 +137,6 @@ replace_path(homer_genome_update_script_full_path, '-install sacCer3', sacCer3_h
 replace_path(homer_genome_update_script_full_path, '-install dm6', dm6_homer_genome_command_line) # Replace the old path to homer with the new one
 
 subprocess.run('bash {}/homer_genome_update.sh'.format(sys.path[0]), shell = True) # Run the provided homer_genome_update.sh to update required HOMER genomic databases
-
 
 path_to_chipap_scripts = 'PATH=$PATH:{}/chipap_scripts'.format(sys.path[0]) # Define the path to the directory "chipap_scripts"
 
